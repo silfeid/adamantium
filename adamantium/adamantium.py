@@ -13,6 +13,7 @@ import time
 import regex as re
 
 def show_guidance():
+    print('\nThese are the functions (besides this one) currently contained in the adamantium package:\n')
     funcs = {1:'junkdrawer', 2:'saver', 3:'fetcher', 4:'recursive_flatten', 5:'folio_api_call', 6:'clean_titles', 7:'libinsight_api_call', 8:'remove_carriage_returns'}
     for key, value in funcs.items():
         print(key, value)
