@@ -283,5 +283,3 @@ def remove_carriage_returns(df):
     for col in df.select_dtypes(include=['object', 'string']):
         df[col] = df[col].map(lambda x: re.sub(r'[\r\n]+', ' ', x) if isinstance(x, str) else x)
     return df
-
-Add adamantium package with __init__.py
