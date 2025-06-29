@@ -13,8 +13,7 @@ import time
 import regex as re
 
 def show_guidance():
-    print('\nThese are the functions (besides this one) currently contained in the adamantium package:\n')
-    funcs = {1:'junkdrawer', 2:'saver', 3:'fetcher', 4:'recursive_flatten', 5:'folio_api_call', 6:'clean_titles', 7:'libinsight_api_call', 8:'remove_carriage_returns'}
+    funcs = {1:'junkdrawer', 2:'saver', 3:'fetcher', 4:'recursive_flatten', 5:'folio_api_call', 6:'clean_titles', 7:'libinsight_api_call', 8:'remove_carriage_returns', 9:'fetch_libinsight_token'}
     for key, value in funcs.items():
         print(key, value)
     guidance = int(input('\nEnter the number of the function that you wish to examine: '))
@@ -37,9 +36,11 @@ def show_guidance():
                 print('The function "libinsight_api_call" executes an API call to LibInsight (duh).  You need to feed it a bunch of crap - that one is not ready yet. ')
             elif guidance == 8:
                 print('The function "remove_carriage_returns" does what it says to an entire df - the only input variable needed.')
+            elif guidance == 9:
+                print('The function "fetch_libinsight_token" does what its name implies; you need to feed it two values after running it: client_id and client_secret, in that order.  Get them from the LibInsight website (Widgets and APIs > Manage API Authentication); then copy-paste them when prompted after running the function.')
     except:
         print('Summat is broken, sir')
-
+        
 def junkdrawer(df, label=None):
     if not label:
         label = input("Enter a label for the DataFrame or press enter to use default (df): ").strip()
@@ -96,6 +97,46 @@ def fetcher(multipass =None, directory=None, extension=None):
     print(rf'The most recent file in that directory is named: {newest_filename}')
 
     return filepath, multipass, newest_filename
+
+def load_most_recent_df(multipass =None, directory=None, extension=None):
+    
+    if directory is None:
+        directory = (input('Enter the filepath of your data directory starting with Box (e.g., Box\Annual Report Procedures\Dashboard\Data\Raw Data): '))
+    if multipass is None:
+        multipass = input('Enter your multipass username: ')
+    if extension is None:
+        extension = input('Extension of data files (.csv or .xlsx): ')
+    
+    directory = rf'C:\Users\{multipass}\{directory}'
+    download_dict = {}
+    
+    for filename in os.listdir(directory):
+        if filename.endswith(extension):
+            download_dict[filename] = os.path.getctime(directory+"/"+filename)
+    
+    #Get the value of the most newly created file in our dictionary:
+    newest_data = max(download_dict.values())
+    
+    for key, value in download_dict.items():
+        if value == newest_data:
+            newest_filename = key
+            
+    filepath = rf'{directory}\{newest_filename}'        
+    
+    print(rf'The most recent file in that directory is named: {newest_filename}')
+    
+    while True:
+        ans = input('Do you wish to load that file (Y/N)?')
+        if ans.lower() in ['y', 'n']:
+            if ans.lower() == 'y':
+                df = pd.read_csv(filepath)
+                break
+            elif ans.lower() == 'n':
+                print('Understood. The function will return the data frame variable as a None value. All other expected variables (filepath, multipass, newest_filename) will be returned as normal.')
+                df = None
+                break
+
+    return filepath, multipass, newest_filename, df
 
 def recursive_flatten(df):
     # First pass: convert stringified lists/dicts
@@ -289,3 +330,22 @@ def remove_carriage_returns(df):
     for col in df.select_dtypes(include=['object', 'string']):
         df[col] = df[col].map(lambda x: re.sub(r'[\r\n]+', ' ', x) if isinstance(x, str) else x)
     return df
+
+def fetch_libinsight_token():
+    
+    client_id = input('Enter your Client ID: ')
+    client_secret = input('Enter your Client Secret: ')
+    token_url = 'https://duq.libinsight.com/v1.0/oauth/token'
+    response = requests.post(
+    token_url,
+    data={
+        'grant_type': 'client_credentials',
+        'client_id': client_id,
+        'client_secret': client_secret
+    }
+)
+
+    response.raise_for_status()
+    token = response.json()['access_token']
+    return token
+
