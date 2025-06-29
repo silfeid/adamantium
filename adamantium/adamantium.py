@@ -68,13 +68,18 @@ def saver(df, directory, label=None):
         df.to_csv(rf'{directory}\{label}-1.csv', index=False, encoding = 'utf-8-sig')
         print(f'Data frame saved to junk drawer as {label}-1.csv')
         
-def fetcher():
-    download_dict = {}
-    multipass = input('Enter your multipass username: ')
-    directory = (input('Enter the filepath of your data directory starting with Box (e.g., Box\Annual Report Procedures\Dashboard\Data\Raw Data): '))
+def fetcher(multipass =None, directory=None, extension=None):
+    
+    if directory is None:
+        directory = (input('Enter the filepath of your data directory starting with Box (e.g., Box\Annual Report Procedures\Dashboard\Data\Raw Data): '))
+    if multipass is None:
+        multipass = input('Enter your multipass username: ')
+    if extension is None:
+        extension = input('Extension of data files (.csv or .xlsx): ')
+    
     directory = rf'C:\Users\{multipass}\{directory}'
-    extension = input('Extension of data files (.csv or .xlsx): ')
-
+    download_dict = {}
+    
     for filename in os.listdir(directory):
         if filename.endswith(extension):
             download_dict[filename] = os.path.getctime(directory+"/"+filename)
