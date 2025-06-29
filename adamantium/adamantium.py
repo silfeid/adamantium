@@ -131,7 +131,10 @@ def load_most_recent_df(multipass =None, directory=None, extension=None):
         ans = input('Do you wish to load that file (Y/N)?')
         if ans.lower() in ['y', 'n']:
             if ans.lower() == 'y':
-                df = pd.read_csv(filepath)
+                if extension == '.csv':
+                    df = pd.read_csv(filepath)
+                elif extension == '.xlsx':
+                    df = pd.read_excel(filepath)
                 break
             elif ans.lower() == 'n':
                 print('Understood. The function will return the data frame variable as a None value. All other expected variables (filepath, multipass, newest_filename) will be returned as normal.')
