@@ -132,10 +132,10 @@ def load_most_recent_df(multipass =None, directory=None, extension=None):
         if ans.lower() in ['y', 'n']:
             if ans.lower() == 'y':
                 if extension == '.csv':
-                    print('extension is .csv')
+                    print('Loading .csv file...')
                     df = pd.read_csv(filepath)
                 elif extension == '.xlsx':
-                    print('extension is .xlsx')
+                    print('Loading Excel file...)
                     df = pd.read_excel(filepath)
                 break
             elif ans.lower() == 'n':
