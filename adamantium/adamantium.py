@@ -23,7 +23,7 @@ def show_guidance():
             if guidance == 1:
                 print('The function "junkdrawer" saves files to Documents\Analytics\Junkdrawer and requires a data frame as a variable.')
             elif guidance == 2:
-                print('The function "saver" saves files to a directory of your choosing and requires a data frame as a variable; the first variable is the data frame, the second is the directory as a string.')
+                print('The function "saver" saves files to a directory of your choosing and requires a data frame and a directory as variables; the first variable is the data frame, the second is the directory as a string.  If you do not input a directory, you will be prompted for one.')
             elif guidance == 3:
                 print('The function "fetcher" gets the name of the most recently created file in a directory; it takes no variables, you will instead manually input the directory path.')
             elif guidance == 4:
@@ -55,11 +55,13 @@ def junkdrawer(df, label=None):
         df.to_csv('C:/Users/brodea/Documents/Analytics/Junkdrawer/'+label+'1'+'.csv', index=False, encoding = 'utf-8-sig')
         print(f'Data frame saved to junk drawer as {label}.csv')
         
-def saver(df, directory, label=None):
+def saver(df, directory=None, label=None):
     if not label:
         label = input("Enter a label for the DataFrame or press enter to use default (df): ").strip()
         if not label:
             label = "df"
+    if directory is None:
+        directory = input('Enter the directory to which you wish to save, starting with "C:\" : ')
     try:
         df.to_csv(rf'{directory}\{label}.csv', index=False, encoding = 'utf-8-sig')
         print(f'Data frame saved to {directory} as {label}.csv')
