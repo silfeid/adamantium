@@ -249,8 +249,7 @@ def libinsight_api_call(token):
     
     params = {'page':1}
     all_items = []
-    start_date = get_valid_date()
-    end_date = get_valid_date()
+    start_date, end date = get_date_range()
     dataset_id = 8680
     api_url = f'https://duq.libinsight.com/v1.0/custom-dataset/{dataset_id}/data-grid?from={start_date}&to={end_date}'
     
@@ -272,14 +271,26 @@ def libinsight_api_call(token):
     df = pd.DataFrame(all_items)
     return df, start_date, end_date
 
-def get_valid_date():
+def get_date_range():
     while True:
-        date_str = input("Enter a date (YYYY-MM-DD): ")
+        start_date_str = input("Enter a start date (YYYY-MM-DD): ")
         try:
-            valid_date = datetime.strptime(date_str, "%Y-%m-%d")
-            return valid_date  # or return date_str if you want the string
+            valid_start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+            break
         except ValueError:
             print("Invalid format. Please enter a date in YYYY-MM-DD format.")
+    while True:
+        end_date_str = input("Enter an end date (YYYY-MM-DD): ")
+        try:
+            valid_end_date = datetime.strptime(end_date_str, "%Y-%m-%d") 
+            if valid_start_date < valid_end_date:
+                break
+            else:
+                print('End date is prior or equal to start date.  Try again.')
+        except ValueError:
+            print("Invalid format. Please enter a date in YYYY-MM-DD format.")
+
+    return start_date_str, end_date_str
             
 def clean_titles(title):
 
