@@ -359,10 +359,11 @@ def remove_carriage_returns(df):
         df[col] = df[col].map(lambda x: re.sub(r'[\r\n]+', ' ', x) if isinstance(x, str) else x)
     return df
 
-def fetch_libinsight_token():
-    
-    client_id = input('Enter your Client ID: ')
-    client_secret = input('Enter your Client Secret: ')
+def fetch_libinsight_token(client_id=None, client_secret=None):
+    if client_id is None:
+        client_id = input('Enter your Client ID: ')
+    if client_secret is None:
+        client_secret = input('Enter your Client Secret: ')
     token_url = 'https://duq.libinsight.com/v1.0/oauth/token'
     response = requests.post(
     token_url,
