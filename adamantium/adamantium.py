@@ -11,6 +11,7 @@ import ast
 import requests
 import time
 import regex as re
+from datetime import datetime
 
 def show_guidance():
     funcs = {1:'junkdrawer', 2:'saver', 3:'fetcher', 4:'recursive_flatten', 5:'folio_api_call', 6:'clean_titles', 7:'libinsight_api_call', 8:'remove_carriage_returns', 9:'fetch_libinsight_token'}
@@ -248,8 +249,8 @@ def libinsight_api_call(token):
     
     params = {'page':1}
     all_items = []
-    start_date = pd.to_datetime("2019-01-01")#input('Enter start date of prior month in format YYYY-MM-DD: ')
-    end_date = pd.to_datetime("2019-12-31")#input('Enter end date of prior month in format YYYY-MM-DD: ')
+    start_date = get_valid_date()
+    end_date = get_valid_date()
     dataset_id = 8680
     api_url = f'https://duq.libinsight.com/v1.0/custom-dataset/{dataset_id}/data-grid?from={start_date}&to={end_date}'
     
@@ -268,9 +269,18 @@ def libinsight_api_call(token):
             params['page'] += 1
         else:
             break
-    return all_items
+    df = pd.DataFrame(all_items)
+    return df, start_date, end_date
 
-
+def get_valid_date():
+    while True:
+        date_str = input("Enter a date (YYYY-MM-DD): ")
+        try:
+            valid_date = datetime.strptime(date_str, "%Y-%m-%d")
+            return valid_date  # or return date_str if you want the string
+        except ValueError:
+            print("Invalid format. Please enter a date in YYYY-MM-DD format.")
+            
 def clean_titles(title):
 
     def smart_title_case(text):
