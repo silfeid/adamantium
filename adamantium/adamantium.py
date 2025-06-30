@@ -249,7 +249,7 @@ def libinsight_api_call(token):
     
     params = {'page':1}
     all_items = []
-    start_date, end date = get_date_range()
+    start_date, end_date = get_date_range()
     dataset_id = 8680
     api_url = f'https://duq.libinsight.com/v1.0/custom-dataset/{dataset_id}/data-grid?from={start_date}&to={end_date}'
     
