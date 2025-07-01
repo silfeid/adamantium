@@ -137,7 +137,7 @@ def load_most_recent_df(multipass =None, directory=None, extension=None):
                     df = pd.read_csv(filepath)
                 elif extension == '.xlsx':
                     print('Loading Excel file...')
-                    df = pd.read_excel(filepath)
+                    df = pd.read_excel(filepath, engine='openpyxl')
                 break
             elif ans.lower() == 'n':
                 print('Understood. The function will return the data frame variable as a None value. All other expected variables (filepath, multipass, newest_filename) will be returned as normal.')
