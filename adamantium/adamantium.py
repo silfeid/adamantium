@@ -251,7 +251,7 @@ def libinsight_api_call(token, dataset_id=None):
     all_items = []
     start_date, end_date = get_date_range()
     if dataset_id is None:
-        dataset_id = input('Enter the dataset ID number (four digits): ')
+        dataset_id = input('Enter the dataset ID number: ')
     api_url = f'https://duq.libinsight.com/v1.0/custom-dataset/{dataset_id}/data-grid?from={start_date}&to={end_date}'
     
     while True:
