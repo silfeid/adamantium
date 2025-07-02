@@ -12,6 +12,15 @@ import requests
 import time
 import regex as re
 from datetime import datetime
+import inspect
+
+def show_function_source(func):
+    """Print the source code of any function defined in the script."""
+    try:
+        source = inspect.getsource(func)
+        print(source)
+    except (TypeError, OSError) as e:
+        print(f"Could not retrieve source: {e}")
 
 def show_guidance():
     funcs = {1:'junkdrawer', 2:'saver', 3:'fetcher', 4:'recursive_flatten', 5:'folio_api_call', 6:'clean_titles', 7:'libinsight_api_call', 8:'remove_carriage_returns', 9:'fetch_libinsight_token'}
