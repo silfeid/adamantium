@@ -240,7 +240,7 @@ def folio_api_call(endpoint, tenant_id, token):
         data = recursive_flatten(pd.DataFrame(data))   
     return data
 
-def libinsight_api_call(token):
+def libinsight_api_call(token, dataset_id=None):
     
     headers = {
         'Authorization': f'Bearer {token}',
@@ -250,7 +250,8 @@ def libinsight_api_call(token):
     params = {'page':1}
     all_items = []
     start_date, end_date = get_date_range()
-    dataset_id = 8680
+    if dataset_id is None:
+        dataset_id = input('Enter the dataset ID number (four digits): ')
     api_url = f'https://duq.libinsight.com/v1.0/custom-dataset/{dataset_id}/data-grid?from={start_date}&to={end_date}'
     
     while True:
