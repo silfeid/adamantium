@@ -759,3 +759,24 @@ def subject_field_adder(call_dict):
                         subfield_dict[key] = LoC_dict[item]
 
     return gumberg_dict, subject_dict, subfield_dict
+
+def check_classification_segments(call_numbers):
+    results = {}
+    for call_number in call_numbers:
+        #Remove premature whitespace:
+        if len(call_number) > 2:
+            if call_number[2] == ' ':
+                call = list(call_number)
+                call[2] = ''
+                call = ''.join(call)
+            else:
+                call = call_number
+        else:
+            call = call_number
+        # Extract the classification segment (first part before any spaces)
+        if call == '':
+            classification_segment = call
+        else:
+            classification_segment = call.split()[0]
+        results[call_number] = is_classification_segment(classification_segment)
+    return results
