@@ -13,43 +13,6 @@ import time
 import regex as re
 from datetime import datetime
 import inspect
-
-def show_function_source(func):
-    """Print the source code of any function defined in the script."""
-    try:
-        source = inspect.getsource(func)
-        print(source)
-    except (TypeError, OSError) as e:
-        print(f"Could not retrieve source: {e}")
-
-def show_guidance():
-    funcs = {1:'junkdrawer', 2:'saver', 3:'fetcher', 4:'recursive_flatten', 5:'folio_api_call', 6:'clean_titles', 7:'libinsight_api_call', 8:'remove_carriage_returns', 9:'fetch_libinsight_token'}
-    for key, value in funcs.items():
-        print(key, value)
-    guidance = int(input('\nEnter the number of the function that you wish to examine: '))
-    try:
-        if guidance in funcs.keys():
-            print(guidance)
-            if guidance == 1:
-                print('The function "junkdrawer" saves files to Documents\Analytics\Junkdrawer and requires a data frame as a variable.')
-            elif guidance == 2:
-                print('The function "saver" saves files to a directory of your choosing and requires a data frame and a directory as variables; the first variable is the data frame, the second is the directory as a string.  If you do not input a directory, you will be prompted for one.')
-            elif guidance == 3:
-                print('The function "fetcher" gets the name of the most recently created file in a directory; it takes no variables, you will instead manually input the directory path.')
-            elif guidance == 4:
-                print('The function "recursive flatten" un-nests json data where cells in the df are populated by lists (usually even after json_normalize etc.).  It takes a df as its single variable.')
-            elif guidance == 5:
-                print('The function "folio_api_call" executes an API call to Folio (duh).  You need to feed it your endpoint (no base url needed), tenant_id, and token, in that order.')
-            elif guidance == 6:
-                print('The function "clean_titles" does a nice title-case cleanup job on titles, way better than Python\'s built-in version.  It takes a string as its input; probably mostly you will want to use it on a df[column] with .apply()')
-            elif guidance == 7:
-                print('The function "libinsight_api_call" executes an API call to LibInsight (duh).  You need to feed it a bunch of crap - that one is not ready yet. ')
-            elif guidance == 8:
-                print('The function "remove_carriage_returns" does what it says to an entire df - the only input variable needed.')
-            elif guidance == 9:
-                print('The function "fetch_libinsight_token" does what its name implies; you need to feed it two values after running it: client_id and client_secret, in that order.  Get them from the LibInsight website (Widgets and APIs > Manage API Authentication); then copy-paste them when prompted after running the function.')
-    except:
-        print('Summat is broken, sir')
         
 def junkdrawer(df, label=None):
     if not label:
@@ -780,3 +743,42 @@ def check_classification_segments(call_numbers):
             classification_segment = call.split()[0]
         results[call_number] = is_classification_segment(classification_segment)
     return results
+
+def list_functions(module):
+    return [name for name, obj in inspect.getmembers(module, inspect.isfunction)
+            if obj.__module__ == module.__name__]
+
+def show_function_code(module, func_name):
+    try:
+        func = getattr(module, func_name)
+        if inspect.isfunction(func):
+            print(f"\nSource code for '{func_name}':\n")
+            print(inspect.getsource(func))
+        else:
+            print(f"'{func_name}' is not a function.")
+    except Exception as e:
+        print(f"Error retrieving function '{func_name}': {e}")
+
+def module_help(module):
+    funcs = list_functions(module)
+    if not funcs:
+        print(f"No functions found in {module.__name__}")
+        return
+
+    print(f"Functions in {module.__name__}:\n")
+    for i, f in enumerate(funcs, 1):
+        print(f"{i}. {f}")
+
+    while True:
+        choice = input("\nEnter a number to see the function code (or leave blank to exit): ").strip()
+        if choice == "":
+            break
+        if not choice.isdigit():
+            print("Please enter a valid number.")
+            continue
+
+        index = int(choice)
+        if 1 <= index <= len(funcs):
+            show_function_code(module, funcs[index - 1])
+        else:
+            print(f"Please choose a number between 1 and {len(funcs)}.")
