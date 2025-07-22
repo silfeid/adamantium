@@ -779,8 +779,7 @@ def show_function_code(module, func_name):
     except Exception as e:
         print(f"Error retrieving function '{func_name}': {e}")
 
-def module_help():
-    module = 'adamantium'
+def module_help(module):
     funcs = list_functions(module)
     if not funcs:
         print(f"No functions found in {module.__name__}")
