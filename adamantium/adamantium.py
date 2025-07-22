@@ -166,6 +166,26 @@ def recursive_flatten(df):
     df = df.dropna(axis=1, how='all')
     return df
 
+def get_folio_token():
+    tenant_id = input('Enter your Folio tenant ID: ')    
+    okapi_url='https://okapi-duquesne.folio.ebsco.com'
+    headers = {
+        'Content-Type': 'application/json',
+        'x-okapi-tenant': tenant_id
+    }
+    payload = {
+        'username': 'gumberg-api',
+        'password': 'GumbergLibraryAPIOnly10/24/2024'
+    }
+    response = requests.post(f'{okapi_url}/authn/login', json=payload, headers=headers)
+    if response.status_code == 201:
+        token = response.headers.get('x-okapi-token')
+        print("Access token retrieved successfully.")
+        return token, tenant_id
+    else:
+        print(f"Login failed: {response.status_code} - {response.text}")
+        return None
+
 def folio_api_call(endpoint, tenant_id, token):
     url = f"https://okapi-duquesne.folio.ebsco.com/{endpoint}"
     # Headers for authentication
