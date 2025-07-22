@@ -184,7 +184,6 @@ def folio_api_call(endpoint, tenant_id, token):
     
     while True:
         response = requests.get(url, headers=headers, params=params)
-        print(response.status_code)
         if response.status_code == 200:
             response.data = response.json()
             if response.data['totalRecords'] > 0:
