@@ -802,3 +802,23 @@ def module_help(module):
             show_function_code(module, funcs[index - 1])
         else:
             print(f"Please choose a number between 1 and {len(funcs)}.")
+
+def concat_df_dir(directory):
+    
+    df_list = []
+    for file in os.listdir(directory):
+        extension = file.split('.')[-1]
+        if extension == 'csv':
+            df = pd.read_csv(rf'{directory}\{file}', encoding = 'utf-8-sig')
+        elif extension == 'xlsx':
+            df = pd.read_excel(rf'{directory}\{file}', engine='openpyxl')
+        else:
+            print(f'{file} was not .csv or .xlsx - skipping')
+        df_list.append(df)
+    try:
+        master = pd.concat(df_list)
+    except Exception as e:
+        print(f"Concat failed: {e}")
+    
+    return master
+
