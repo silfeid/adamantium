@@ -822,3 +822,28 @@ def concat_df_dir(directory):
     
     return master
 
+def title_fixer(unfixed_titles):
+    fixed_titles = []
+    for title in unfixed_titles:
+        if title:
+            title = str(title)
+            title = title.replace('&', 'and')
+            title = title.replace(',', '')
+            title = title.rstrip(punctuation)
+            title = unidecode(title)
+            title = title.split()
+            new_title = []
+            for word in title:
+                if word.isupper():
+                    new_title.append(word)
+                else:
+                    word = string.capwords(word)
+                    new_title.append(word)
+            new_title = ' '.join(new_title)
+            if new_title == 'Nan':
+                new_title = ''
+            fixed_titles.append(new_title)
+        else:
+            fixed_titles.append('')
+    return fixed_titles
+
