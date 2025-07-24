@@ -13,6 +13,8 @@ import time
 import regex as re
 from datetime import datetime
 import inspect
+from string import punctuation
+punctuation = punctuation.replace(']', '')
         
 def junkdrawer(df, label=None):
     if not label:
