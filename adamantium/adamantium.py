@@ -15,6 +15,7 @@ from datetime import datetime
 import inspect
 from string import punctuation
 punctuation = punctuation.replace(']', '')
+from unidecode import unidecode
         
 def junkdrawer(df, label=None):
     if not label:
