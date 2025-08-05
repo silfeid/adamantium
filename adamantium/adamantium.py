@@ -872,4 +872,36 @@ def title_fixer(unfixed_titles):
         else:
             fixed_titles.append('')
     return fixed_titles
-
+        
+patron_group_dict = {
+    'DCLI Law faculty': 'Law faculty', 
+    'DCLI Law School staff': 'Law School staff', 
+    'DCLI Inter-Library Loan': 'Inter-Library Loan', 
+    'DCLI Law Admin': 'Law Admin', 
+    'DCLI Exec': 'DCLI Exec', 
+    'DCLI Law Rev/Other Groups': 'Law Rev/Other Groups', 
+    'ACLL-ALL JUDGES': 'All Judges', 
+    'ACLL INTER-LIBRARY LOAN': 'Interlibrary Loan', 
+    'ACLL-Recent Law Graduate Card': 'Recent Law Graduate Card', 
+    'ACLL-Firm 101+': 'Firm 101+', 
+    'ACLL-Firm 61-100': 'Firm 61-100', 
+    'ACLL-Firm 25-60': 'Firm 25-60', 
+    'ACLL-Firm 2-24': 'Firm 2-24', 
+    'ACLL-Solo Practitioner': 'Solo Practitioner',
+    'ACLL-General Public (Allegheny)': 'General Public (Allegheny)', 
+    'ACLL-Out of Cty Attorney': 'Out of Cty Attorney', 
+    'ACLL-Out of Cty General Public': 'Out of Cty General Public', 
+    'ACLL-Government (City/Cty)': 'Government (City/Cty)', 
+    'ACLL-Government (State)': 'Government (State)', 
+    'ACLL-Government (Federal)': 'Government (Federal)', 
+    'ACLL-Retired Attorney': 'Retired Attorney', 
+    'ACLL-Nonprofit Attorney': 'Nonprofit Attorney', 
+    'G-EMPLOYEE': 'Staff', 
+    'G-STUDENT-GRADUATE': 'Graduate Student Non-Law',
+    'GRETEM': 'Retired Faculty', 
+    'G-STUDENT-UNDERGRADUATE': 'Undergraduate',
+    'G-ALUMNI': 'Alumni', 
+    'G-NON-DUQUESNE': 'Gumberg Reciprocal', 
+    'G-UNKNOWN': 'Repair', 
+    'G-EZBORROW': 'EZBORROW', 
+    'G-ILL': 'Internal Use'}
