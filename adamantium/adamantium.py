@@ -189,6 +189,26 @@ def get_folio_token():
         print(f"Login failed: {response.status_code} - {response.text}")
         return None
 
+def get_folio_token():
+    tenant_id = 'fs00001138'  
+    okapi_url='https://okapi-duquesne.folio.ebsco.com'
+    headers = {
+        'Content-Type': 'application/json',
+        'x-okapi-tenant': tenant_id
+    }
+    payload = {
+        'username': 'api-users',
+        'password': 'Api@UsersTest1'
+    }
+    response = requests.post(f'{okapi_url}/authn/login', json=payload, headers=headers)
+    if response.status_code == 201:
+        token = response.headers.get('x-okapi-token')
+        print("Access token retrieved successfully.")
+        return token, tenant_id
+    else:
+        print(f"Login failed: {response.status_code} - {response.text}")
+        return None
+
 def folio_api_call(endpoint, tenant_id, token):
     url = f"https://okapi-duquesne.folio.ebsco.com/{endpoint}"
     # Headers for authentication
