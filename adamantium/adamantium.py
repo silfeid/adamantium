@@ -141,7 +141,10 @@ def recursive_flatten(df):
                     if isinstance(val, dict):
                         flat = pd.json_normalize(val).add_prefix(f"{col}.")
                         for flat_col in flat.columns:
-                            df.at[i, flat_col] = flat.iloc[0][flat_col]
+                            value = flat.iloc[0][flat_col]
+                            if isinstance(value, (list, dict)):
+                                value = str(value)
+                            df.at[i, flat_col] = value
                         df.at[i, col] = None
                         keep_going = True
                 continue
