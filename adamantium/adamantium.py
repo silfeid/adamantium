@@ -773,13 +773,13 @@ def subject_field_adder(call_dict):
 def check_classification_segments(call_numbers):
         
         def is_classification_segment(s):
-        pattern = r'^[A-Z]{1,3}\d{1,5}(\.\d+)?'
-        q = re.match(pattern, s)
-        if q:
-        x = 'Valid'
-        else:
-        x = 'Invalid'
-        return x
+            pattern = r'^[A-Z]{1,3}\d{1,5}(\.\d+)?'
+            q = re.match(pattern, s)
+            if q:
+                x = 'Valid'
+            else:
+                x = 'Invalid'
+            return x
         
         results = {}
         for call_number in call_numbers:
