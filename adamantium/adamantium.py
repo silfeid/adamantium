@@ -771,8 +771,18 @@ def subject_field_adder(call_dict):
     return gumberg_dict, subject_dict, subfield_dict
 
 def check_classification_segments(call_numbers):
-    results = {}
-    for call_number in call_numbers:
+        
+        def is_classification_segment(s):
+        pattern = r'^[A-Z]{1,3}\d{1,5}(\.\d+)?'
+        q = re.match(pattern, s)
+        if q:
+        x = 'Valid'
+        else:
+        x = 'Invalid'
+        return x
+        
+        results = {}
+        for call_number in call_numbers:
         #Remove premature whitespace:
         if len(call_number) > 2:
             if call_number[2] == ' ':
@@ -789,7 +799,7 @@ def check_classification_segments(call_numbers):
         else:
             classification_segment = call.split()[0]
         results[call_number] = is_classification_segment(classification_segment)
-    return results
+        return results
 
 def list_functions(module):
     return [name for name, obj in inspect.getmembers(module, inspect.isfunction)
