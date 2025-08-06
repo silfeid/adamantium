@@ -33,6 +33,7 @@ def junkdrawer(df, label=None):
         print(f'Data frame saved to junk drawer as {label}.csv')
         
 def saver(df, directory=None, label=None):
+    counter = 0
     if not label:
         label = input("Enter a label for the DataFrame or press enter to use default (df): ").strip()
         if not label:
@@ -40,12 +41,13 @@ def saver(df, directory=None, label=None):
     if directory is None:
         directory = input('Enter the directory to which you wish to save, starting with "C:\" : ')
     try:
-        df.to_csv(rf'{directory}\{label}.csv', index=False, encoding = 'utf-8-sig')
+        df.to_csv(rf'{directory}\{label}.csv', index=False, encoding = 'utf-8-sig', na_rep='')
         print(f'Data frame saved to {directory} as {label}.csv')
     except AttributeError:
         print('Variable is not a DataFrame and cannot be exported as .csv file.')
-    except PermissionError:        
-        df.to_csv(rf'{directory}\{label}-1.csv', index=False, encoding = 'utf-8-sig')
+    except PermissionError:
+        counter += 1
+        df.to_csv(rf'{directory}\{label}{counter}.csv', index=False, encoding = 'utf-8-sig', na_rep='')
         print(f'Data frame saved to junk drawer as {label}-1.csv')
         
 def fetcher(multipass =None, directory=None, extension=None):
@@ -128,7 +130,7 @@ def recursive_flatten(df):
         df[col] = df[col].apply(
             lambda x: ast.literal_eval(x) if isinstance(x, str) and (x.strip().startswith('[') or x.strip().startswith('{')) else x
         )
-    
+
     keep_going = True
     while keep_going:
         keep_going = False
@@ -136,7 +138,6 @@ def recursive_flatten(df):
             col_data = df[col].dropna()
 
             if col_data.apply(lambda x: isinstance(x, dict)).any():
-                # Flatten dicts at the row level
                 for i, row in df.iterrows():
                     val = row[col]
                     if isinstance(val, dict):
@@ -145,13 +146,17 @@ def recursive_flatten(df):
                             value = flat.iloc[0][flat_col]
                             if isinstance(value, (list, dict)):
                                 value = str(value)
+                            # Ensure compatible dtype assignment
+                            if flat_col not in df.columns:
+                                df[flat_col] = pd.NA
+                            if df[flat_col].dtype != object:
+                                df[flat_col] = df[flat_col].astype(object)
                             df.at[i, flat_col] = value
                         df.at[i, col] = None
                         keep_going = True
                 continue
 
             if col_data.apply(lambda x: isinstance(x, list) and all(isinstance(i, dict) for i in x)).any():
-                # Flatten list of dicts at row level
                 for i, row in df.iterrows():
                     val = row[col]
                     if isinstance(val, list) and all(isinstance(i, dict) for i in val):
@@ -159,19 +164,22 @@ def recursive_flatten(df):
                         for d in val:
                             combined.update(d)
                         for k, v in combined.items():
-                            df.at[i, f"{col}.{k}"] = v
+                            flat_col = f"{col}.{k}"
+                            if flat_col not in df.columns:
+                                df[flat_col] = pd.NA
+                            if df[flat_col].dtype != object:
+                                df[flat_col] = df[flat_col].astype(object)
+                            df.at[i, flat_col] = v
                         df.at[i, col] = None
                         keep_going = True
                 continue
 
             if col_data.apply(lambda x: isinstance(x, list)).any():
-                # Turn list of scalars into strings
                 df[col] = df[col].apply(lambda x: ', '.join(map(str, x)) if isinstance(x, list) else x)
                 keep_going = True
-
-    # Optionally drop empty columns if they resulted from flattening
-    df = df.dropna(axis=1, how='all')
-    return df
+                
+    df = df.astype(object).where(pd.notna(df), None)
+    return df.dropna(axis=1, how='all')
 
 def get_folio_token():
     tenant_id = input('Enter your Folio tenant ID: ')    
@@ -771,18 +779,18 @@ def subject_field_adder(call_dict):
     return gumberg_dict, subject_dict, subfield_dict
 
 def check_classification_segments(call_numbers):
-        
-        def is_classification_segment(s):
-            pattern = r'^[A-Z]{1,3}\d{1,5}(\.\d+)?'
-            q = re.match(pattern, s)
-            if q:
-                x = 'Valid'
-            else:
-                x = 'Invalid'
-            return x
-        
-        results = {}
-        for call_number in call_numbers:
+    
+    def is_classification_segment(s):
+        pattern = r'^[A-Z]{1,3}\d{1,5}(\.\d+)?'
+        q = re.match(pattern, s)
+        if q:
+            x = 'Valid'
+        else:
+            x = 'Invalid'
+        return x
+    
+    results = {}
+    for call_number in call_numbers:
         #Remove premature whitespace:
         if len(call_number) > 2:
             if call_number[2] == ' ':
@@ -799,7 +807,7 @@ def check_classification_segments(call_numbers):
         else:
             classification_segment = call.split()[0]
         results[call_number] = is_classification_segment(classification_segment)
-        return results
+    return results
 
 def list_functions(module):
     return [name for name, obj in inspect.getmembers(module, inspect.isfunction)
@@ -916,3 +924,104 @@ patron_group_dict = {
     'G-UNKNOWN': 'Repair', 
     'G-EZBORROW': 'EZBORROW', 
     'G-ILL': 'Internal Use'}
+
+floor_dict = {
+    'Law Library - Microform Collection': 'Law Library',
+    'Law Library - Treatise Collection Ground Floor': 'Law Library Ground Floor',
+    'Gumberg 5th Floor Curriculum Center Picture Books': 'Gumberg 5th Floor',
+    'Law Library - HeinOnline': 'Law Library',
+    'Law Library - Hein (Online)': 'Law Library',
+    'Gumberg 1st Floor Phenomenology Center Eckartsberg': 'Gumberg 1st Floor',
+    'Gumberg 5th Floor Curriculum Center Chapter Books': 'Gumberg 5th Floor',
+    'Gumberg 2nd Floor General Collection': 'Gumberg 2nd Floor',
+    'Gumberg 5th Floor Curriculum Center Stacks': 'Gumberg 5th Floor',
+    'Gumberg 2nd Floor Popular Reading Collection': 'Gumberg 2nd Floor',
+    'Gumberg 2nd Floor Archives Cardinal Wright Collection': 'Gumberg 2nd Floor',
+    'Law Library - Pa. Collection 1st Floor': 'Law Library 1st Floor',
+    'Gumberg 4th Floor Popular Reading Collection': 'Gumberg 4th Floor',
+    'Gumberg 2nd Floor Archives Hailperin Collection': 'Gumberg 2nd Floor',
+    'Gumberg 1st Floor Compact Shelving Oversize': 'Gumberg 1st Floor',
+    'Law Library - Taylor-Ledewitz Collection': 'Law Library 1st Floor',
+    'Gumberg 1st Floor Phenomenology Center': 'Gumberg 1st Floor',
+    'Law Library - Reporters Area': 'Law Library 1st Floor',
+    'Gumberg 5th Floor Curriculum Center AV': 'Gumberg 5th Floor',
+    'Gumberg 4th Floor Holds Shelves': 'Gumberg 4th Floor',
+    'Law Library - eBook Central': 'Law Library',
+    'Gumberg 5th Floor Curriculum Center Kits': 'Gumberg 5th Floor',
+    'Law Library - Law Clinics': 'Law Library',
+    'Gumberg 1st Floor Compact Shelving Media': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Archives Musmanno': 'Gumberg 1st Floor',
+    'Law Library - Reserve Collection': 'Law Library',
+    'Law Library - Display Case': 'Law Library',
+    'Gumberg 1st Floor Phenomenology Center Giorgi': 'Gumberg 1st Floor',
+    'Law Library - Pa Collection': 'Law Library 1st Floor',
+    'Gumberg 1st Floor Archives Rare Book Room': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Phenomenology Center Straus': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Archives Rare Book Room Oversize': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Phenomenology Center Schuwer': 'Gumberg 1st Floor',
+    'Gumberg 2nd Floor Archives Hailperin Collection Periodicals': 'Gumberg 2nd Floor',
+    'Gumberg 4th Floor Reserve Shelves': 'Gumberg 4th Floor',
+    'Gumberg Library Front Desk': 'Gumberg',
+    'Law Library - WITHDRAWN - NEED TO DO OCLC': 'Law Library',
+    'Law Library - CD-ROM Collection': 'Law Library',
+    'Law Library - Tech. Services': 'Law Library',
+    'Law Library - Online Database': 'Law Library',
+    'Law Library - Faculty Area': 'Law Library',
+    'Law Library - DVD Collection': 'Law Library',
+    'Gumberg 2nd Floor Archives Hailperin Collection Oversize': 'Gumberg 2nd Floor',
+    'Law Library - Rare/Archive Collection': 'Law Library',
+    'Law Library - Govt Doc CD-ROM': 'Law Library',
+    'Gumberg 4th Floor Library of Things': 'Gumberg 4th Floor',
+    'Gumberg 4th Floor Newspaper': 'Gumberg 4th Floor',
+    'Gumberg 1st Floor Archives Special Collections': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Spiritan Collection': 'Gumberg 1st Floor',
+    'Law Library - Lexis Overdrive': 'Law Library',
+    'Law Library - Online Govt Document': 'Law Library',
+    'Law Library - Mediation Room': 'Law Library',
+    'Law Library - Periodicals': 'Law Library',
+    'Gumberg 1st Floor Archives': 'Gumberg 1st Floor',
+    'Law Library - Lexis': 'Law Library',
+    'Gumberg 1st Floor Phenomenology Center Periodicals': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Compact Shelving Folio': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Phenomenology Center Murray': 'Gumberg 1st Floor',
+    'Law Library - Making of Modern Law': 'Law Library',
+    'Gumberg 1st Floor Phenomenology Center Gurwitsch': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Compact Shelving Periodicals': 'Gumberg 1st Floor',
+    'Gumberg 2nd Floor Archives Cardinal Wright Collection Oversize': 'Gumberg 2nd Floor',
+    'Law Library - Govt Docs Microfiche': 'Law Library',
+    'Gumberg 1st Floor Phenomenology Center Strasser': 'Gumberg 1st Floor',
+    'Law Library - Westlaw': 'Law Library',
+    'Gumberg 1st Floor Microforms': 'Gumberg 1st Floor',
+    'CTE 727 Fisher Hall': 'CTE',
+    'Gumberg 1st Floor Phenomenology Center Oversized': 'Gumberg 1st Floor',
+    'Rome Campus Library': 'Rome Campus Library',
+    'Law Library - Instructional Lab': 'Law Library',
+    'Law Library - Audio Collection': 'Law Library',
+    'Law Library - USB/Diskette Collection': 'Law Library',
+    'Gumberg 1st Floor Phenomenology University Press': 'Gumberg 1st Floor',
+    'Law Library - WITHDRAWN volume count': 'Law Library',
+    'Law Library - Appellate Moot Court Room': 'Law Library',
+    'Career Center': 'Career Center',
+    'Law Library - Free Internet Resource': 'Law Library',
+    'Gumberg 1st Floor Archives Clarke Collection': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Archives Special Collections Periodicals': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Archives Special Collections Folio': 'Gumberg 1st Floor',
+    'TALK TO JEFF': 'Unknown',
+    'Gumberg 1st Floor Spiritan Collection Annex': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Archives Special Collections Oversize': 'Gumberg 1st Floor',
+    'Gumberg Unknown gu': 'Unknown',
+    'Gumberg 1st Floor Archives Rare Book Room Giannetti': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Archives Rare Book Room Rooney': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Phenomenology Center AV': 'Gumberg 1st Floor',
+    'Gumberg 5th Floor Curriculum Center Big Books': 'Gumberg 5th Floor',
+    'Gumberg 1st Floor Phenomenology Center Peperzak': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Compact Shelving Theses': 'Gumberg 1st Floor',
+    'Law Library - Storage B2': 'Law Library',
+    'Law Library - Citator Collection': 'Law Library',
+    'Gumberg 1st Floor Archives Rare Book Room Folio': 'Gumberg 1st Floor',
+    'Gumberg 1st Floor Phenomenology Center Peperzak (g1pperperzak)':'Gumberg 1st Floor',
+    'Gumberg 5th Floor Resource Sharing':'Gumberg 5th Floor',
+    'Law Library - WITHDRAWN-NEED TO DO OCLC':'Law Library',
+    'Gumberg 4th Floor Circulation Desk':'Gumberg 4th Floor',
+    'Gumberg 4th Floor Circulation Office':'Gumberg 4th Floor'
+}
